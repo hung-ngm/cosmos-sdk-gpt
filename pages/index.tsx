@@ -4,7 +4,6 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import ReactMarkdown from 'react-markdown';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
@@ -133,15 +132,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className={styles.topnav}>
-        <div className = {styles.navlogo}>
-          <Link href="/">Cosmos SDK GPT</Link>
-        </div>
-        <div className = {styles.navlinks}>
-          <a href="https://langchain.readthedocs.io/en/latest/" target="_blank">Docs</a>
-          <a href="https://github.com/minhhung123/langchain-chat-nextjs-typescript" target="_blank">GitHub</a>
-        </div>
-      </div>
+      
 
       <main className={styles.main}>
         <div className={styles.cloud}>
@@ -193,6 +184,14 @@ const Home: NextPage = () => {
                 )}
               </button>
             </form>
+          </div>
+
+          <div className={styles.footer}>
+            <div className="center">
+              <br />
+              <p>Want this for your project ?</p>
+              <p>Contact me <a href="https://twitter.com/HUNGSSSS" target="_blank" rel="noreferrer">Hung Nguyen</a>.</p>
+            </div>
           </div>
 
         </div>
