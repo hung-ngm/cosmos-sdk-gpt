@@ -1,7 +1,13 @@
-import * as fs from "fs";
-import { Document } from "langchain/document";
+import { Document } from 'langchain/document';
 import { load } from "cheerio";
 import path from "path";
+import * as fs from "fs";
+import { BaseDocumentLoader } from "langchain/document_loaders";
+import { Embeddings, OpenAIEmbeddings } from "langchain/embeddings";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseVectorStore } from "langchain/vectorstores";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { supabaseClient } from "../utils/supabase-client";
 
 const processFile = async (filePath: string): Promise<Document> => {
     return await new Promise<Document>((resolve, reject) => {
@@ -44,3 +50,49 @@ const processDirectory = async (directoryPath: string): Promise<Document[]> => {
     }
     return docs;
 }
+
+class RepoLoader extends BaseDocumentLoader {
+    constructor(public filePath: string) {
+        super();
+    }
+
+    async load(): Promise<Document[]> {
+        return await processDirectory(this.filePath);
+    }
+}
+
+const embedDocuments = async (
+    client: SupabaseClient,
+    docs: Document[],
+    embeddings: Embeddings
+) => {
+    console.log("Creating embeddings...");
+    await SupabaseVectorStore.fromDocuments(docs, embeddings, {
+        client
+    });
+    console.log("Embeddings successfully stored in Supabase.");
+}
+
+const splitDocsIntoChunks = async (docs: Document[]): Promise<Document[]> => {
+    const textSplitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 8000,
+        chunkOverlap: 100
+    }) 
+    return await textSplitter.splitDocuments(docs)
+}
+
+const directoryPath = "ingest/markdown/cosmos-sdk"
+const loader = new RepoLoader(directoryPath);
+
+(async function run() {
+    try {
+        const rawDocs = await loader.load();
+        console.log("Loader created.");
+        const docs = await splitDocsIntoChunks(rawDocs);
+        console.log("Docs splitted.");
+        await embedDocuments(supabaseClient, docs, new OpenAIEmbeddings());
+        console.log("Documents embedded into Supabase Vectorstore");
+    } catch (error) {
+        console.log("error", error);
+    }
+})();
