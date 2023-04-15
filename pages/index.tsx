@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-target-blank */
 import { useState, useRef, useEffect, useMemo } from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -23,7 +24,10 @@ const Home: NextPage = () => {
     history: [string, string][] 
   }>({
     messages: [{
-      "message": "Hi there! How can I help?",
+      "message": `Hi there! I'm CosmosSDKGPT — a chatbot powered by ChatGPT. I can read an entire codebase and generate documentation. 
+      I'm currently trained on the Cosmos SDK codebase (https://github.com/cosmos/cosmos-sdk). 
+      Ask me anything about how the validator works and I'll try my best try to answer. 
+      \n**Current model:** GPT-3.5.`,
       "type": "apiMessage"
     }],
     history: []
