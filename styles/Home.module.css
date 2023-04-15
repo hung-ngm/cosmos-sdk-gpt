@@ -180,12 +180,12 @@
 }
 
 .markdownanswer a {
-  color: #16bed7;
+  color: #166ad7;
   font-weight: 500;
 }
 
 .markdownanswer code {
-  color: #15cb19;
+  color: #166ad7;
   font-weight: 500;
   white-space: pre-wrap !important;
 }
