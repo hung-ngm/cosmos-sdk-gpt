@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
+import Markdown from '../components/Markdown';
 
 type Message = {
   type: "apiMessage" | "userMessage";
@@ -24,7 +25,7 @@ const Home: NextPage = () => {
     history: [string, string][] 
   }>({
     messages: [{
-      "message": `Hi there! I'm CosmosSDKGPT — a chatbot powered by ChatGPT. I can read an entire codebase and generate documentation. 
+      "message": `Hi there! I'm Cosmos-SDK-GPT — a chatbot powered by ChatGPT. I can read an entire codebase and generate documentation. 
       I'm currently trained on the Cosmos SDK codebase (https://github.com/cosmos/cosmos-sdk). 
       Ask me anything about how the validator works and I'll try my best try to answer. 
       \n**Current model:** GPT-3.5.`,
@@ -126,7 +127,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>LangChain Chat</title>
+        <title>Cosmos SDK GPT</title>
         <meta name="description" content="LangChain documentation chatbot" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -134,7 +135,7 @@ const Home: NextPage = () => {
 
       <div className={styles.topnav}>
         <div className = {styles.navlogo}>
-          <Link href="/">LangChain</Link>
+          <Link href="/">Cosmos SDK GPT</Link>
         </div>
         <div className = {styles.navlinks}>
           <a href="https://langchain.readthedocs.io/en/latest/" target="_blank">Docs</a>
@@ -147,13 +148,10 @@ const Home: NextPage = () => {
           <div ref={messageListRef} className={styles.messagelist}>
             {chatMessages.map((message, index) => {
               return (
-                // The latest message sent by the user will be animated while waiting for a response
                   <div key = {index} className = {message.type === "userMessage" && loading && index === messages.length - 1  ? styles.usermessagewaiting : message.type === "apiMessage" ? styles.apimessage : styles.usermessage}>
-                    {/* Display the correct icon depending on the message type */}
-                    {message.type === "apiMessage" ? <Image src = "/parroticon.png" alt = "AI" width = "30" height = "30" className = {styles.boticon} priority = {true} /> : <Image src = "/usericon.png" alt = "Me" width = "30" height = "30" className = {styles.usericon} priority = {true} />}
-                  <div className = {styles.markdownanswer}>
-                    {/* Messages are being rendered in Markdown format */}
-                    <ReactMarkdown linkTarget = {"_blank"}>{message.message}</ReactMarkdown>
+                    {message.type === "apiMessage" ? <Image src = "/cosmos_hub.jpeg" alt = "AI" width = "30" height = "30" className = {styles.boticon} priority = {true} /> : <Image src = "/usericon.png" alt = "Me" width = "30" height = "30" className = {styles.usericon} priority = {true} />}
+                    <div className = {styles.markdownanswer}>
+                      <Markdown markdown={message.message} />
                     </div>
                   </div>
               )
