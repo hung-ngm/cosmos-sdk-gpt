@@ -1,25 +1,60 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-const LCC_ENDPOINT_URL = process.env.LCC_ENDPOINT_URL || "";
-const LCC_TOKEN = process.env.LCC_TOKEN || "";
+import { supabaseClient } from '../../utils/supabase-client';
+import { OpenAIEmbeddings } from 'langchain/embeddings';
+import { SupabaseVectorStore } from 'langchain/vectorstores';
+import { openai } from '../../utils/openai-client';
+import { makeChain } from '../../utils/makechain';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-    const response = await fetch(LCC_ENDPOINT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Api-Key": LCC_TOKEN
-        },
-        body: JSON.stringify({
-          question: req.body.question,
-          history: req.body.history
-        }),
+  const { question, history } = req.body;
+
+  if (!question) {
+    return res.status(400).json({ message: 'No question in the request' });
+  }
+  // OpenAI recommends replacing newlines with spaces for best results
+  const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
+
+  /* create vectorstore*/
+  const vectorStore = await SupabaseVectorStore.fromExistingIndex(
+    new OpenAIEmbeddings(), {
+      client: supabaseClient
+    }
+  );
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+  });
+
+  const sendData = (data: string) => {
+    res.write(`data: ${data}\n\n`);
+  };
+
+  sendData(JSON.stringify({ data: '' }));
+
+  const model = openai;
+  
+  // create the chain
+  const chain = makeChain(vectorStore, (token: string) => {
+    sendData(JSON.stringify({ data: token }));
+  });
+
+  try {
+    //Ask a question
+    const response = await chain.call({
+      question: sanitizedQuestion,
+      chat_history: history || [],
     });
-    
-    const data = await response.json();
-    
-    res.status(200).json({ result: data })
+
+    console.log('response', response);
+  } catch (error) {
+    console.log('error', error);
+  } finally {
+    sendData('[DONE]');
+    res.end();
+  }
 }
